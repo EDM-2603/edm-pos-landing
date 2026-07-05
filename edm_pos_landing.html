@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDM POS — Mfumo wa Mauzo kwa Duka Lako</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a2420;
+    --paper:#f6f1e4;
+    --paper-2:#efe8d6;
+    --teal:#0d3b3e;
+    --teal-bright:#1f8a86;
+    --gold:#dfa03c;
+    --clay:#b8503c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans',sans-serif;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  .display{font-family:'Archivo Black',sans-serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+  /* Texture: subtle paper grain via repeating dots */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.035;
+    background-image:radial-gradient(var(--ink) 1px,transparent 1px);
+    background-size:14px 14px;
+  }
+
+  /* NAV */
+  nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(246,241,228,.92);backdrop-filter:blur(6px);
+    border-bottom:1.5px solid var(--ink);
+  }
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Archivo Black',sans-serif;font-size:18px;letter-spacing:.5px;}
+  .logo-mark{width:32px;height:32px;background:var(--teal);color:var(--paper);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .nav-cta{
+    background:var(--teal);color:var(--paper);padding:9px 18px;border-radius:100px;
+    font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;
+  }
+  .lang-switch{display:flex;border:1.5px solid var(--ink);border-radius:100px;overflow:hidden;}
+  .lang-btn{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:7px 13px;
+    background:transparent;border:none;cursor:pointer;color:var(--ink);
+  }
+  .lang-btn.active{background:var(--ink);color:var(--paper);}
+
+  /* HERO */
+  .hero{position:relative;padding:70px 0 90px;overflow:hidden;}
+  .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;
+    font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);
+    background:var(--paper-2);border:1px solid var(--ink);padding:6px 12px;border-radius:100px;margin-bottom:22px;
+  }
+  .eyebrow span{width:6px;height:6px;border-radius:50%;background:var(--clay);display:inline-block;}
+  h1{
+    font-size:clamp(38px,5.2vw,60px);line-height:.98;letter-spacing:-.01em;margin-bottom:22px;
+  }
+  h1 .accent{color:var(--teal-bright);-webkit-text-stroke:1px var(--ink);}
+  .hero-sub{font-size:18px;max-width:480px;color:#3b4440;margin-bottom:32px;}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;padding:15px 26px;border-radius:10px;
+    font-weight:700;font-size:15px;border:2px solid var(--ink);cursor:pointer;transition:transform .15s;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{background:var(--gold);color:var(--ink);}
+  .btn-ghost{background:transparent;color:var(--ink);}
+
+  /* RECEIPT SIGNATURE ELEMENT */
+  .receipt-stage{display:flex;justify-content:center;perspective:1000px;}
+  .receipt{
+    width:260px;background:#fff;border-radius:4px;padding:22px 20px 26px;
+    box-shadow:0 30px 60px -20px rgba(13,59,62,.35),0 2px 0 rgba(0,0,0,.05);
+    transform:rotate(3deg);
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:#2a2a2a;
+    position:relative;
+  }
+  .receipt::after{
+    content:'';position:absolute;left:0;right:0;bottom:-9px;height:18px;
+    background:
+      linear-gradient(135deg,#fff 50%,transparent 50%) 0 0,
+      linear-gradient(-135deg,#fff 50%,transparent 50%) 0 0;
+    background-size:16px 18px;background-repeat:repeat-x;
+  }
+  .r-line{display:flex;justify-content:space-between;padding:3px 0;opacity:0;animation:rline .5s ease forwards;}
+  .r-line:nth-child(1){animation-delay:.2s}.r-line:nth-child(2){animation-delay:.5s}
+  .r-line:nth-child(3){animation-delay:.8s}.r-line:nth-child(4){animation-delay:1.1s}
+  .r-line:nth-child(5){animation-delay:1.4s}.r-line:nth-child(6){animation-delay:1.7s}
+  .r-line:nth-child(7){animation-delay:2s}.r-line:nth-child(8){animation-delay:2.3s}
+  @keyframes rline{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .r-head{text-align:center;font-family:'Archivo Black',sans-serif;font-size:13px;margin-bottom:4px;}
+  .r-sub{text-align:center;font-size:10px;color:#777;margin-bottom:12px;}
+  .r-dash{border-top:1px dashed #ccc;margin:8px 0;}
+  .r-tot{display:flex;justify-content:space-between;font-weight:700;font-size:14px;border-top:1.5px dashed #333;border-bottom:1.5px dashed #333;padding:6px 0;margin:8px 0;color:var(--teal);}
+  .r-qr{width:52px;height:52px;margin:12px auto 4px;background:
+      repeating-linear-gradient(0deg,#111 0 3px,transparent 3px 6px),
+      repeating-linear-gradient(90deg,#111 0 3px,transparent 3px 6px);
+      background-blend-mode:multiply;opacity:.85;}
+  .r-foot{text-align:center;font-size:9px;color:#999;margin-top:6px;}
+  .float-badge{
+    position:absolute;background:var(--clay);color:#fff;font-size:11px;font-weight:700;
+    padding:7px 12px;border-radius:8px;transform:rotate(-6deg);box-shadow:0 8px 16px rgba(184,80,60,.3);
+    font-family:'Work Sans',sans-serif;
+  }
+  .fb1{top:-6px;right:-6px;}
+  .fb2{bottom:40px;left:-30px;background:var(--teal-bright);transform:rotate(5deg);}
+
+  /* SECTION HEADER */
+  .sec-head{text-align:center;max-width:560px;margin:0 auto 44px;}
+  .sec-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-bright);margin-bottom:10px;}
+  .sec-head h2{font-size:clamp(28px,3.6vw,40px);letter-spacing:-.01em;}
+
+  section{padding:80px 0;position:relative;z-index:1;}
+  .divider{height:2px;background:repeating-linear-gradient(90deg,var(--ink) 0 10px,transparent 10px 18px);opacity:.5;}
+
+  /* WHO ITS FOR - price tag chips */
+  .tag-row{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;}
+  .tag{
+    background:#fff;border:2px solid var(--ink);border-radius:12px;padding:18px 22px;min-width:150px;
+    text-align:center;position:relative;box-shadow:4px 4px 0 var(--ink);transition:transform .15s;
+  }
+  .tag:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink);}
+  .tag .ic{font-size:30px;margin-bottom:8px;}
+  .tag .tt{font-weight:700;font-size:14px;}
+  .tag::before{
+    content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);
+    width:12px;height:12px;background:var(--paper);border:2px solid var(--ink);border-radius:50%;
+  }
+
+  /* FEATURES - stock list style */
+  .stock-list{border:2px solid var(--ink);border-radius:14px;overflow:hidden;background:#fff;}
+  .stock-row{display:flex;align-items:flex-start;gap:16px;padding:20px 22px;border-bottom:1.5px solid #e4ddc9;}
+  .stock-row:last-child{border-bottom:none;}
+  .stock-row .ic{
+    width:42px;height:42px;background:var(--paper-2);border:1.5px solid var(--ink);border-radius:9px;
+    display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+  }
+  .stock-row h3{font-size:16px;margin-bottom:4px;}
+  .stock-row p{font-size:14px;color:#4a534e;}
+  .stock-badge{
+    font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;background:#dcefe4;color:#166534;
+    padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle;white-space:nowrap;
+  }
+
+  /* HOW IT WORKS */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+  .step{position:relative;padding-top:8px;}
+  .step .num{font-family:'Archivo Black',sans-serif;font-size:46px;color:var(--paper-2);-webkit-text-stroke:2px var(--ink);margin-bottom:10px;line-height:1;}
+  .step h3{font-size:18px;margin-bottom:8px;}
+  .step p{font-size:14px;color:#4a534e;}
+
+  /* PRICING */
+  .price-wrap{display:flex;justify-content:center;gap:26px;flex-wrap:wrap;align-items:stretch;}
+  .price-tag{
+    background:var(--teal);color:var(--paper);border-radius:16px;padding:34px 34px 30px;max-width:340px;width:100%;
+    position:relative;box-shadow:8px 8px 0 var(--gold);display:flex;flex-direction:column;
+  }
+  .price-tag.founder{box-shadow:8px 8px 0 var(--clay);}
+  .price-tag .ribbon{
+    position:absolute;top:-14px;left:24px;background:var(--clay);color:#fff;font-size:11px;font-weight:700;
+    padding:6px 14px;border-radius:6px;transform:rotate(-3deg);box-shadow:0 6px 12px rgba(184,80,60,.35);
+    font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;text-transform:uppercase;
+  }
+  .price-tag::before{
+    content:'';position:absolute;top:-10px;right:28px;width:20px;height:20px;background:var(--paper);
+    border-radius:50%;box-shadow:0 0 0 2px var(--teal);
+  }
+  .price-tag .pt-label{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.75;margin-bottom:6px;}
+  .price-tag .pt-amount{font-family:'Archivo Black',sans-serif;font-size:44px;margin-bottom:4px;}
+  .price-tag .pt-amount small{font-size:16px;font-family:'Work Sans',sans-serif;font-weight:500;opacity:.8;}
+  .price-tag ul{list-style:none;margin:22px 0;}
+  .price-tag li{font-size:14px;padding:7px 0;border-top:1px solid rgba(246,241,228,.15);display:flex;gap:8px;}
+  .price-tag .btn-primary{width:100%;justify-content:center;margin-top:6px;}
+  .pt-note{font-size:12px;opacity:.7;margin-top:10px;}
+
+  /* CTA FOOTER */
+  .cta-band{
+    background:var(--ink);color:var(--paper);text-align:center;padding:80px 24px;
+  }
+  .cta-band h2{font-size:clamp(28px,4vw,42px);margin-bottom:16px;}
+  .cta-band p{color:#c9cec9;max-width:440px;margin:0 auto 30px;}
+  .cta-band .btn-primary{border-color:var(--paper);}
+
+  footer{padding:28px 24px;text-align:center;font-size:13px;color:#6b746e;}
+
+  @media(max-width:820px){
+    .hero-grid{grid-template-columns:1fr;}
+    .receipt-stage{margin-top:20px;}
+    .steps{grid-template-columns:1fr;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .r-line{animation:none!important;opacity:1!important;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo"><div class="logo-mark">🧾</div>EDM POS</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="lang-switch">
+        <button class="lang-btn active" id="lang-sw" onclick="setLang('sw')">SW</button>
+        <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
+      </div>
+      <a href="https://erickpos.vercel.app/#demo" target="_blank" rel="noopener" class="nav-cta" data-t="navCta">💬 Pata Demo</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow"><span></span><span data-t="eyebrow">Kwa maduka ya Tanzania</span></div>
+      <h1><span data-t="h1a">Kila mauzo,</span><br><span class="accent" data-t="h1b">kwenye kumbukumbu.</span></h1>
+      <p class="hero-sub" data-t="heroSub">EDM POS ni mfumo wa mauzo na stock unaofanya kazi kwenye simu au kompyuta — kwa duka la dawa, spare, mavazi, au biashara yoyote. Faini, VAT, na ripoti — vyote sehemu moja.</p>
+      <div class="cta-row">
+        <a href="#wasiliana" class="btn btn-primary" data-t="ctaWa">💬 Ongea Nasi WhatsApp</a>
+        <a href="#jinsi" class="btn btn-ghost" data-t="ctaHow">Jinsi inavyofanya kazi ↓</a>
+      </div>
+    </div>
+    <div class="receipt-stage">
+      <div style="position:relative;">
+        <div class="receipt">
+          <div class="r-head" data-t="rHead">STAKABADHI YA MAUZO</div>
+          <div class="r-sub" data-t="rSub">DUKA LA MFANO · MWANZA</div>
+          <div class="r-dash"></div>
+          <div class="r-line"><span data-t="rNo">No: 0184</span><span>10:42</span></div>
+          <div class="r-line"><span data-t="rItem1">Sabuni Omo</span><span>4,000</span></div>
+          <div class="r-line"><span data-t="rItem2">Sukari 1kg</span><span>3,200</span></div>
+          <div class="r-line"><span data-t="rItem3">Mafuta 1L</span><span>6,500</span></div>
+          <div class="r-dash"></div>
+          <div class="r-line"><span data-t="rVat">VAT (18%)</span><span>2,133</span></div>
+          <div class="r-tot"><span data-t="rTotal">JUMLA</span><span>13,700</span></div>
+          <div class="r-line" style="justify-content:center;"><div class="r-qr"></div></div>
+          <div class="r-foot" data-t="rFoot">ASANTE KWA MAUZO · EDM POS</div>
+        </div>
+        <div class="float-badge fb1" data-t="fbLive">Live</div>
+        <div class="float-badge fb2" data-t="fbVat">+VAT auto</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<section id="kwaajili">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-eyebrow" data-t="kwaEyebrow">Kwa nani</div>
+      <h2 data-t="kwaH2">Duka lolote, mfumo mmoja.</h2>
+    </div>
+    <div class="tag-row">
+      <div class="tag"><div class="ic">💊</div><div class="tt" data-t="tag1">Duka la Dawa</div></div>
+      <div class="tag"><div class="ic">🔧</div><div class="tt" data-t="tag2">Spare Parts</div></div>
+      <div class="tag"><div class="ic">🛒</div><div class="tt" data-t="tag3">Duka la Jumla</div></div>
+      <div class="tag"><div class="ic">👕</div><div class="tt" data-t="tag4">Mavazi</div></div>
+      <div class="tag"><div class="ic">📱</div><div class="tt" data-t="tag5">Electronics</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="features" style="background:var(--paper-2);">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-eyebrow" data-t="featEyebrow">Kilichomo</div>
+      <h2 data-t="featH2">Kila kitu duka lako linahitaji.</h2>
+    </div>
+    <div class="stock-list">
+      <div class="stock-row">
+        <div class="ic">🧾</div>
+        <div><h3><span data-t="f1h">Mauzo &amp; Risiti</span> <span class="stock-badge" data-t="f1b">QR + VAT</span></h3><p data-t="f1p">Fanya mauzo kwa sekunde, tengeneza risiti yenye QR code na VAT sahihi kiotomatiki.</p></div>
+      </div>
+      <div class="stock-row">
+        <div class="ic">📦</div>
+        <div><h3><span data-t="f2h">Stock ya Bidhaa</span> <span class="stock-badge" data-t="f2b">Real-time</span></h3><p data-t="f2p">Fuatilia bidhaa zinazopungua, ongeza mpya, na epuka kuishiwa bila kujua.</p></div>
+      </div>
+      <div class="stock-row">
+        <div class="ic">👥</div>
+        <div><h3><span data-t="f3h">Wafanyakazi Wengi</span> <span class="stock-badge" data-t="f3b">Roles</span></h3><p data-t="f3p">Ongeza wauzaji wako, kila mmoja na akaunti yake — fuatilia nani ameuza nini.</p></div>
+      </div>
+      <div class="stock-row">
+        <div class="ic">🛡️</div>
+        <div><h3><span data-t="f4h">Udhibiti wa Usajili</span> <span class="stock-badge" data-t="f4b">Salama</span></h3><p data-t="f4p">Hakuna anayeweza kutumia mfumo bila ruhusa yako — udhibiti kamili wa nani anajiunga.</p></div>
+      </div>
+      <div class="stock-row">
+        <div class="ic">📊</div>
+        <div><h3 data-t="f5h">Ripoti za Papo kwa Papo</h3><p data-t="f5p">Ona mauzo, faida, na VAT ya siku/wiki/mwezi bila kuandika kwa mkono.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="jinsi">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-eyebrow" data-t="jinsiEyebrow">Jinsi Inavyofanya Kazi</div>
+      <h2 data-t="jinsiH2">Dakika tatu, uko tayari.</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num">01</div><h3 data-t="s1h">Wasiliana Nasi</h3><p data-t="s1p">Tuma ujumbe WhatsApp, tutakupa Access Code ya duka lako.</p></div>
+      <div class="step"><div class="num">02</div><h3 data-t="s2h">Sajili Duka</h3><p data-t="s2p">Jaza taarifa za duka lako na bidhaa zako za kwanza — dakika chache tu.</p></div>
+      <div class="step"><div class="num">03</div><h3 data-t="s3h">Anza Kuuza</h3><p data-t="s3p">Fungua kwenye simu au kompyuta yoyote, na anza kuuza na kufuatilia mara moja.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="bei" style="background:var(--paper-2);">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-eyebrow" data-t="beiEyebrow">Bei</div>
+      <h2 data-t="beiH2">Bei nafuu, thamani kubwa.</h2>
+    </div>
+    <div class="price-wrap">
+      <div class="price-tag founder">
+        <div class="ribbon" data-t="ribbon">Wateja 10 wa Kwanza Tu</div>
+        <div class="pt-label" data-t="p1label">Ofa ya Uzinduzi</div>
+        <div class="pt-amount">800,000<small data-t="p1suffix">/mara moja</small></div>
+        <ul>
+          <li data-t="p1li1">✓ Malipo MARA MOJA — hakuna ada ya mwaka</li>
+          <li data-t="pliCommon1">✓ Bidhaa na wafanyakazi bila kikomo</li>
+          <li data-t="pliCommon2">✓ Risiti zenye QR na VAT</li>
+          <li data-t="pliCommon3">✓ Ripoti za mauzo papo kwa papo</li>
+          <li data-t="pliCommon4">✓ Msaada wa moja kwa moja (WhatsApp)</li>
+        </ul>
+        <a href="#wasiliana" class="btn btn-primary" data-t="p1btn">💬 Chukua Nafasi Yako</a>
+        <div class="pt-note" data-t="p1note">Ofa hii ni kwa wateja 10 wa kwanza tu kujiunga. Ikiisha, bei ya kawaida itatumika.</div>
+      </div>
+      <div class="price-tag">
+        <div class="pt-label" data-t="p2label">Kifurushi cha Kawaida</div>
+        <div class="pt-amount">530,000<small data-t="p2suffix">/mwaka wa 1</small></div>
+        <ul>
+          <li data-t="pliCommon1">✓ Bidhaa na wafanyakazi bila kikomo</li>
+          <li data-t="pliCommon2">✓ Risiti zenye QR na VAT</li>
+          <li data-t="pliCommon3">✓ Ripoti za mauzo papo kwa papo</li>
+          <li data-t="pliCommon4">✓ Msaada wa moja kwa moja (WhatsApp)</li>
+        </ul>
+        <a href="#wasiliana" class="btn btn-primary" data-t="p2btn">💬 Pata Bei Yako</a>
+        <div class="pt-note" data-t="p2note">Kuanzia mwaka wa 2: TZS 60,000/mwaka tu kuendelea kutumia mfumo.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band" id="wasiliana">
+  <h2 data-t="ctaH2">Uko tayari kuboresha duka lako?</h2>
+  <p data-t="ctaP">Tuma ujumbe sasa — tutakuonyesha demo na kukupatia Access Code ya kuanza.</p>
+  <a href="https://wa.me/255747569713?text=Habari%2C%20naomba%20taarifa%20za%20EDM%20POS" class="btn btn-primary" data-t="ctaBtn">💬 Tuma WhatsApp Sasa</a>
+</section>
+
+<footer data-t="footerText">EDM POS © 2026 ·</footer>
+
+<script>
+const LT = {
+  sw:{
+    navCta:'💬 Pata Demo',
+    eyebrow:'Kwa maduka ya Tanzania',
+    h1a:'Kila mauzo,', h1b:'kwenye kumbukumbu.',
+    heroSub:'EDM POS ni mfumo wa mauzo na stock unaofanya kazi kwenye simu au kompyuta — kwa duka la dawa, spare, mavazi, au biashara yoyote. Faini, VAT, na ripoti — vyote sehemu moja.',
+    ctaWa:'💬 Ongea Nasi WhatsApp', ctaHow:'Jinsi inavyofanya kazi ↓',
+    rHead:'STAKABADHI YA MAUZO', rSub:'DUKA LA MFANO · MWANZA',
+    rNo:'No: 0184', rItem1:'Sabuni Omo', rItem2:'Sukari 1kg', rItem3:'Mafuta 1L',
+    rVat:'VAT (18%)', rTotal:'JUMLA', rFoot:'ASANTE KWA MAUZO · EDM POS',
+    fbLive:'Live', fbVat:'+VAT auto',
+    kwaEyebrow:'Kwa nani', kwaH2:'Duka lolote, mfumo mmoja.',
+    tag1:'Duka la Dawa', tag2:'Spare Parts', tag3:'Duka la Jumla', tag4:'Mavazi', tag5:'Electronics',
+    featEyebrow:'Kilichomo', featH2:'Kila kitu duka lako linahitaji.',
+    f1h:'Mauzo & Risiti', f1b:'QR + VAT', f1p:'Fanya mauzo kwa sekunde, tengeneza risiti yenye QR code na VAT sahihi kiotomatiki.',
+    f2h:'Stock ya Bidhaa', f2b:'Real-time', f2p:'Fuatilia bidhaa zinazopungua, ongeza mpya, na epuka kuishiwa bila kujua.',
+    f3h:'Wafanyakazi Wengi', f3b:'Roles', f3p:'Ongeza wauzaji wako, kila mmoja na akaunti yake — fuatilia nani ameuza nini.',
+    f4h:'Udhibiti wa Usajili', f4b:'Salama', f4p:'Hakuna anayeweza kutumia mfumo bila ruhusa yako — udhibiti kamili wa nani anajiunga.',
+    f5h:'Ripoti za Papo kwa Papo', f5p:'Ona mauzo, faida, na VAT ya siku/wiki/mwezi bila kuandika kwa mkono.',
+    jinsiEyebrow:'Jinsi Inavyofanya Kazi', jinsiH2:'Dakika tatu, uko tayari.',
+    s1h:'Wasiliana Nasi', s1p:'Tuma ujumbe WhatsApp, tutakupa Access Code ya duka lako.',
+    s2h:'Sajili Duka', s2p:'Jaza taarifa za duka lako na bidhaa zako za kwanza — dakika chache tu.',
+    s3h:'Anza Kuuza', s3p:'Fungua kwenye simu au kompyuta yoyote, na anza kuuza na kufuatilia mara moja.',
+    beiEyebrow:'Bei', beiH2:'Bei nafuu, thamani kubwa.',
+    ribbon:'Wateja 10 wa Kwanza Tu',
+    p1label:'Ofa ya Uzinduzi', p1suffix:'/mara moja',
+    p1li1:'✓ Malipo MARA MOJA — hakuna ada ya mwaka',
+    pliCommon1:'✓ Bidhaa na wafanyakazi bila kikomo',
+    pliCommon2:'✓ Risiti zenye QR na VAT',
+    pliCommon3:'✓ Ripoti za mauzo papo kwa papo',
+    pliCommon4:'✓ Msaada wa moja kwa moja (WhatsApp)',
+    p1btn:'💬 Chukua Nafasi Yako',
+    p1note:'Ofa hii ni kwa wateja 10 wa kwanza tu kujiunga. Ikiisha, bei ya kawaida itatumika.',
+    p2label:'Kifurushi cha Kawaida', p2suffix:'/mwaka wa 1',
+    p2btn:'💬 Pata Bei Yako',
+    p2note:'Kuanzia mwaka wa 2: TZS 60,000/mwaka tu kuendelea kutumia mfumo.',
+    ctaH2:'Uko tayari kuboresha duka lako?',
+    ctaP:'Tuma ujumbe sasa — tutakuonyesha demo na kukupatia Access Code ya kuanza.',
+    ctaBtn:'💬 Tuma WhatsApp Sasa',
+    footerText:'EDM POS © 2026 ·',
+  },
+  en:{
+    navCta:'💬 Get a Demo',
+    eyebrow:'For shops across Tanzania',
+    h1a:'Every sale,', h1b:'on record.',
+    heroSub:'EDM POS is a sales & stock system that works on your phone or computer — for pharmacies, spare parts, clothing, or any shop. Sales, VAT, and reports — all in one place.',
+    ctaWa:'💬 Chat With Us on WhatsApp', ctaHow:'See how it works ↓',
+    rHead:'SALES RECEIPT', rSub:'SAMPLE SHOP · MWANZA',
+    rNo:'No: 0184', rItem1:'Omo Soap', rItem2:'Sugar 1kg', rItem3:'Cooking Oil 1L',
+    rVat:'VAT (18%)', rTotal:'TOTAL', rFoot:'THANK YOU · EDM POS',
+    fbLive:'Live', fbVat:'+VAT auto',
+    kwaEyebrow:'Who it\'s for', kwaH2:'Any shop, one system.',
+    tag1:'Pharmacy', tag2:'Spare Parts', tag3:'General Store', tag4:'Clothing', tag5:'Electronics',
+    featEyebrow:'What\'s inside', featH2:'Everything your shop needs.',
+    f1h:'Sales & Receipts', f1b:'QR + VAT', f1p:'Complete a sale in seconds, print a receipt with a QR code and accurate VAT automatically.',
+    f2h:'Product Stock', f2b:'Real-time', f2p:'Track low stock, add new products, and never run out without knowing.',
+    f3h:'Multiple Staff', f3b:'Roles', f3p:'Add your sellers, each with their own login — see who sold what.',
+    f4h:'Signup Control', f4b:'Secure', f4p:'No one can use the system without your permission — full control over who joins.',
+    f5h:'Instant Reports', f5p:'See sales, profit, and VAT for the day/week/month without writing anything by hand.',
+    jinsiEyebrow:'How It Works', jinsiH2:'Three minutes, and you\'re ready.',
+    s1h:'Contact Us', s1p:'Send a WhatsApp message, we\'ll give you an Access Code for your shop.',
+    s2h:'Register Your Shop', s2p:'Fill in your shop details and first products — takes just a few minutes.',
+    s3h:'Start Selling', s3p:'Open it on any phone or computer, and start selling and tracking right away.',
+    beiEyebrow:'Pricing', beiH2:'Affordable, high value.',
+    ribbon:'First 10 Customers Only',
+    p1label:'Launch Offer', p1suffix:'/one-time',
+    p1li1:'✓ ONE-TIME payment — no yearly fee',
+    pliCommon1:'✓ Unlimited products and staff',
+    pliCommon2:'✓ Receipts with QR and VAT',
+    pliCommon3:'✓ Instant sales reports',
+    pliCommon4:'✓ Direct support (WhatsApp)',
+    p1btn:'💬 Claim Your Spot',
+    p1note:'This offer is for the first 10 customers only. After that, regular pricing applies.',
+    p2label:'Standard Package', p2suffix:'/year 1',
+    p2btn:'💬 Get Your Price',
+    p2note:'From year 2 onward: just TZS 60,000/year to keep using the system.',
+    ctaH2:'Ready to upgrade your shop?',
+    ctaP:'Send a message now — we\'ll show you a demo and give you an Access Code to get started.',
+    ctaBtn:'💬 Send WhatsApp Now',
+    footerText:'EDM POS © 2026 ·',
+  }
+};
+function setLang(l){
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    const key = el.getAttribute('data-t');
+    if(LT[l][key] !== undefined) el.textContent = LT[l][key];
+  });
+  document.getElementById('lang-sw').classList.toggle('active', l==='sw');
+  document.getElementById('lang-en').classList.toggle('active', l==='en');
+  document.documentElement.lang = l;
+  try{ localStorage.setItem('edmpos_landing_lang', l); }catch(e){}
+}
+(function(){
+  let saved = 'sw';
+  try{ saved = localStorage.getItem('edmpos_landing_lang') || 'sw'; }catch(e){}
+  setLang(saved);
+})();
+</script>
+</body>
+</html>
